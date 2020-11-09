@@ -19,4 +19,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\shaders\fragment.glsl" />
+    <None Include="src\shaders\vertex.glsl" />
+    <None Include="src\resources\CuboMulticolorido.csv" />
+    <None Include="src\resources\House.csv" />
+  </ItemGroup>
 </Project>
