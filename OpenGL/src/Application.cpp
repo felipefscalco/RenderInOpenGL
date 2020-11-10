@@ -68,7 +68,7 @@ int main()
 
 	int vectorSize = verticesFromFile.size();
 	float* vertices = new float[vectorSize];
-	for (size_t i = 0; i < vectorSize; i++) 
+	for (size_t i = 0; i < vectorSize; i++)
 	{
 		vertices[i] = verticesFromFile[i];
 	}
@@ -114,6 +114,7 @@ int main()
 		glm::mat4 projection = glm::mat4(1.0f);
 
 		// Gira o modelo ao redor do eixo y
+		//model = glm::rotate(model, 1.5f, glm::vec3(0.0f, -0.5f, 0.0f));
 		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, -0.5f, 0.0f));
 
 		// afasta o objetoo do observador e o coloca um pouco abaixo dele,
