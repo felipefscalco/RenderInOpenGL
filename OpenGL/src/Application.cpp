@@ -16,12 +16,11 @@ void processInput(GLFWwindow* window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-const unsigned int VERTICE_DEFINITION = 8; //3 Positions + 3 Colors ++ Texture Coords
+const unsigned int VERTICE_DEFINITION = 8; //3 Positions + 3 Colors + 2 Texture Coordinates
 
 int main()
 {
 	// glfw: initialize and configure
-	// ------------------------------
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -32,7 +31,6 @@ int main()
 #endif
 
 	// glfw window creation
-	// --------------------
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CSV Renderer", NULL, NULL);
 	if (window == NULL)
 	{
@@ -44,9 +42,8 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	// glew: load all OpenGL function pointers
-	// ---------------------------------------
 	if (glewInit() != GLEW_OK) {
-		std::cout << "Ocorreu um erro iniciando GLEW!" << std::endl;
+		std::cout << "An error occurred while starting GLEW!" << std::endl;
 	}
 	else {
 		std::cout << "GLEW OK!" << std::endl;
@@ -54,15 +51,12 @@ int main()
 	}
 
 	// configure global opengl state
-	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
 	// build and compile our shader zprogram
-	// ------------------------------------
 	Shader ourShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
-	// ------------------------------------------------------------------
 
 	std::vector<float> verticesFromFile = read_csv_file("src/resources/House.csv");
 
@@ -93,15 +87,12 @@ int main()
 	glEnableVertexAttribArray(2);
 
 	// render loop
-	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
 		// input
-		// -----
 		processInput(window);
 
 		// render
-		// ------
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
@@ -113,12 +104,11 @@ int main()
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
 
-		// Gira o modelo ao redor do eixo y
-		//model = glm::rotate(model, 1.5f, glm::vec3(0.0f, -0.5f, 0.0f));
+		// Rotates the model around the y-axis
 		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, -0.5f, 0.0f));
 
-		// afasta o objetoo do observador e o coloca um pouco abaixo dele,
-		// para um ponto de vista mais elevado do objeto
+		// pull the object away from the observer and place it just below it,
+		// to a higher point of view of the object
 		view = glm::translate(view, glm::vec3(-0.0f, -0.9f, -6.0f));
 
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -137,18 +127,15 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, vectorSize / VERTICE_DEFINITION);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	// optional: de-allocate all resources once they've outlived their purpose:
-	// ------------------------------------------------------------------------
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
-	// ------------------------------------------------------------------
 	glfwTerminate();
 	return 0;
 }
