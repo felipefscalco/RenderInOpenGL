@@ -148,14 +148,26 @@
     <ClCompile Include="src\Application.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\resources\CuboMulticolorido.csv" />
-    <None Include="src\resources\House.csv" />
-    <None Include="src\shaders\fragment.glsl" />
+    <None Include="src\resources\ceiling.csv" />
+    <None Include="src\resources\door.csv" />
+    <None Include="src\resources\garden.csv" />
+    <None Include="src\resources\rooftop.csv" />
+    <None Include="src\resources\sun.csv" />
+    <None Include="src\resources\walls.csv" />
+    <None Include="src\resources\window.csv" />
     <None Include="src\shaders\light_cube.fs" />
     <None Include="src\shaders\light_cube.vs" />
     <None Include="src\shaders\phong_lighting.fs" />
     <None Include="src\shaders\phong_lighting.vs" />
-    <None Include="src\shaders\vertex.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\textures\bricks.png" />
+    <Image Include="src\textures\ceiling.jpg" />
+    <Image Include="src\textures\door.jpg" />
+    <Image Include="src\textures\grass.jpg" />
+    <Image Include="src\textures\rooftop.jpg" />
+    <Image Include="src\textures\wall.jpg" />
+    <Image Include="src\textures\window.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -10,17 +10,27 @@
 #include <iostream>
 #include <vector>
 #include <camera.h>
-//...
+
+typedef struct
+{
+    unsigned int VAO;
+    unsigned int VBO;
+    unsigned int texture;
+    int points;
+    bool drawTexture;
+} CustomObject;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
+CustomObject load_custom_object(std::pair<std::string, std::string> fileNameAndTexture);
+unsigned int load_object_texture(std::string textureFileName);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-const unsigned int VERTICE_DEFINITION = 8; //3 Positions + 3 Colors + 2 Texture Coordinates
+const unsigned int VERTICE_DEFINITION = 11; //3 Positions + 3 Colors + 3 Normal Vector + 2 Texture Coordinates
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 6.0f));
@@ -76,87 +86,22 @@ int main()
 
     Shader lightCubeShader("src/shaders/light_cube.vs", "src/shaders/light_cube.fs");
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    /*std::vector<float> verticesFromFile = read_csv_file("src/resources/House.csv");
-    int vectorSize = verticesFromFile.size();
-    float* vertices = new float[vectorSize];
-    for (size_t i = 0; i < vectorSize; i++)
+    std::pair<std::string, std::string> modelsAndTextures[] =
     {
-        vertices[i] = verticesFromFile[i];
-    }*/
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        {"src/resources/garden.csv", "src/textures/grass.jpg"},
+        {"src/resources/walls.csv", "src/textures/wall.jpg"},
+        {"src/resources/door.csv", "src/textures/door.jpg"},
+        {"src/resources/window.csv", "src/textures/window.jpg"},
+        {"src/resources/ceiling.csv", "src/textures/ceiling.jpg"},
+        {"src/resources/rooftop.csv", "src/textures/rooftop.jpg"}
     };
 
-    // first, configure the cube's VAO (and VBO)
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
+    int modelsAndTexturesCount = sizeof(modelsAndTextures) / sizeof(modelsAndTextures[0]);
+    CustomObject* customObjects = new CustomObject[modelsAndTexturesCount];
+    for (int i = 0; i < modelsAndTexturesCount; i++)
+        customObjects[i] = load_custom_object(modelsAndTextures[i]);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vectorSize, vertices, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(cubeVAO);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    unsigned int lightCubeVAO;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    // note that we update the lamp's position attribute's stride to reflect the updated buffer data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+	CustomObject sun = load_custom_object({ "src/resources/sun.csv", "" });
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -174,20 +119,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // change the light's position values over time (can be done anywhere in the render loop actually, but try to do it at least before using the light source positions)
-        /*lightPos.x = cos(glfwGetTime()) * 2.0f;
-        lightPos.y = sin(glfwGetTime()) * 2.0f;
-        lightPos.z = cos(glfwGetTime()) * 2.0f;*/
-        /*lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
-        lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;*/
-
         lightPos.x = sin(glfwGetTime()) * 2.0f;
         lightPos.y = sin(glfwGetTime()) * 2.0f;
         lightPos.z = cos(glfwGetTime()) * 2.0f;
 
         // be sure to activate shader when setting uniforms/drawing objects
         lightingShader.use();
-        lightingShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-        lightingShader.setVec3("lightColor", 0.4f, 0.3f, 0.0f);
+        lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
         lightingShader.setVec3("lightPos", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
         lightingShader.setFloat("specularStrength", specularStrength);
@@ -200,13 +138,16 @@ int main()
 
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
-        // Demonstra o problema da distorção do vetor normal
-        //model = glm::scale(model, glm::vec3(0.5f, 0.2f, 3.0f)); // transformação de escala não linear
         lightingShader.setMat4("model", model);
 
-        // render the cube
-        glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // render objects
+        for (int i = 0; i < modelsAndTexturesCount; i++)
+        {
+            glBindTexture(GL_TEXTURE_2D, customObjects[i].texture);
+            lightingShader.setBool("drawTexture", customObjects[i].drawTexture);
+            glBindVertexArray(customObjects[i].VAO);
+            glDrawArrays(GL_TRIANGLES, 0, customObjects[i].points);
+        }
 
         // also draw the lamp object
         lightCubeShader.use();
@@ -217,7 +158,7 @@ int main()
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         lightCubeShader.setMat4("model", model);
 
-        glBindVertexArray(lightCubeVAO);
+        glBindVertexArray(sun.VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -226,9 +167,14 @@ int main()
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &lightCubeVAO);
-    glDeleteBuffers(1, &VBO);
+    for (int i = 0; i < modelsAndTexturesCount; i++)
+    {
+        glDeleteVertexArrays(1, &customObjects[i].VAO);
+        glDeleteBuffers(1, &customObjects[i].VBO);
+    }
+
+    glDeleteVertexArrays(1, &sun.VAO);
+    glDeleteBuffers(1, &sun.VBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
@@ -296,4 +242,92 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
+}
+
+CustomObject load_custom_object(std::pair<std::string, std::string> fileNameAndTexture)
+{
+    CustomObject customObject;
+
+    std::vector<float> vector = read_csv_file(fileNameAndTexture.first);
+    std::string textureFileName = fileNameAndTexture.second;
+
+    int vectorSize = vector.size();
+    float* vertices = new float[vectorSize];
+    for (size_t i = 0; i < vectorSize; i++)
+    {
+        vertices[i] = vector[i];
+    }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    unsigned int VBO, objVAO;
+    glGenVertexArrays(1, &objVAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(objVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vectorSize, vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTICE_DEFINITION * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTICE_DEFINITION * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTICE_DEFINITION * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, VERTICE_DEFINITION * sizeof(float), (void*)(9 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    if (textureFileName != "")
+    {
+        customObject.texture = load_object_texture(textureFileName);
+        customObject.drawTexture = true;
+    }
+    else
+        customObject.drawTexture = false;
+
+    customObject.points = vectorSize / VERTICE_DEFINITION;
+    customObject.VAO = objVAO;
+    customObject.VBO = VBO;
+
+    return customObject;
+}
+
+unsigned int load_object_texture(std::string textureFileName)
+{
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(1);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    unsigned char* data = stbi_load(textureFileName.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        // PNG with transparent background
+        std::size_t isPng = textureFileName.find(".png");
+        if (isPng != std::string::npos)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        else
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    return texture;
 }
