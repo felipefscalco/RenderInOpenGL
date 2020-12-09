@@ -24,5 +24,9 @@
     <None Include="src\shaders\vertex.glsl" />
     <None Include="src\resources\CuboMulticolorido.csv" />
     <None Include="src\resources\House.csv" />
+    <None Include="src\shaders\light_cube.fs" />
+    <None Include="src\shaders\light_cube.vs" />
+    <None Include="src\shaders\phong_lighting.fs" />
+    <None Include="src\shaders\phong_lighting.vs" />
   </ItemGroup>
 </Project>
