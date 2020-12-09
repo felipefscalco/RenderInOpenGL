@@ -161,7 +161,6 @@
     <None Include="src\shaders\phong_lighting.vs" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="src\textures\bricks.png" />
     <Image Include="src\textures\ceiling.jpg" />
     <Image Include="src\textures\door.jpg" />
     <Image Include="src\textures\grass.jpg" />

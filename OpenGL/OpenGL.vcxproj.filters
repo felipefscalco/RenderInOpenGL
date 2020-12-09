@@ -33,9 +33,6 @@
     <None Include="src\resources\rooftop.csv" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="src\textures\bricks.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="src\textures\grass.jpg">
       <Filter>Resource Files</Filter>
     </Image>
