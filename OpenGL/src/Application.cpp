@@ -85,7 +85,7 @@ int main()
 	// build and compile our shader zprogram
 	Shader lighting_shader("src/shaders/phong_lighting.vs", "src/shaders/phong_lighting.fs");
 
-	Shader lightCubeShader("src/shaders/light_cube.vs", "src/shaders/light_cube.fs");
+	Shader light_cube_shader("src/shaders/light_cube.vs", "src/shaders/light_cube.fs");
 
 	std::pair<std::string, std::string> modelsAndTextures[] =
 	{
@@ -151,13 +151,13 @@ int main()
 		}
 
 		// also draw the lamp object
-		lightCubeShader.use();
-		lightCubeShader.setMat4("projection", projection);
-		lightCubeShader.setMat4("view", view);
+		light_cube_shader.use();
+		light_cube_shader.setMat4("projection", projection);
+		light_cube_shader.setMat4("view", view);
 		model = glm::mat4(1.0f);
 		model = translate(model, light_pos);
 		model = scale(model, glm::vec3(0.2f)); // a smaller cube
-		lightCubeShader.setMat4("model", model);
+		light_cube_shader.setMat4("model", model);
 
 		glBindVertexArray(sun.vao);
 		glDrawArrays(GL_TRIANGLES, 0, sun.points);
